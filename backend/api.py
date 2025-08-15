@@ -9,6 +9,7 @@ from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from werkzeug.exceptions import RequestEntityTooLarge
+import traceback
 
 from services import (
     OCRService, PDFProcessor, ImageProcessor, PreviewGenerator,
@@ -248,7 +249,7 @@ def process_file_ocr(file_path: str, file_type: str) -> str:
     except (OCRError, FileProcessingError):
         raise
     except Exception as e:
-        raise OCRError(f"OCR处理过程中发生未知错误: {e}")
+        raise OCRError(f"OCR处理过程中发生未知错误: {e}\n{traceback.format_exc()}")
 
 
 @app.route('/api/batch-upload', methods=['POST'])

@@ -29,7 +29,10 @@ class OCRService:
         """
         self.logger = logging.getLogger(__name__)
         try:
-            self.ocr = PaddleOCR(use_angle_cls=use_angle_cls, lang=lang)
+            self.ocr =   PaddleOCR(
+                                use_angle_cls=use_angle_cls,
+                                lang=lang,             
+                            )
             self.logger.info("PaddleOCR初始化成功")
         except Exception as e:
             self.logger.error(f"PaddleOCR初始化失败: {e}")
@@ -65,6 +68,8 @@ class OCRService:
                 created_temp = True
             
             # 执行OCR识别
+            print(f"{temp_path}")
+            
             result = self.ocr.ocr(temp_path)
             extracted_text = self._extract_text_from_result(result)
             
@@ -72,8 +77,8 @@ class OCRService:
             return extracted_text
             
         except Exception as e:
-            self.logger.error(f"OCR识别失败: {e}}\n{traceback.format_exc()}")
-            raise OCRError(f"OCR识别失败: {e}}")
+            self.logger.error(f"OCR识别失败: {e}\n{traceback.format_exc()}")
+            raise OCRError(f"OCR识别失败: {e}")
         finally:
             # 清理临时文件
             if temp_path and created_temp and os.path.exists(temp_path):
@@ -157,15 +162,11 @@ class OCRService:
         Returns:
             提取的文本内容
         """
+
         extracted_text = []
-        
-        if result and result[0]:
-            for line in result[0]:
-                if len(line) >= 2 and line[1] and len(line[1]) >= 1:
-                    text = line[1][0]
-                    if text and text.strip():
-                        extracted_text.append(text.strip())
-        
+        if result:
+            for res in result:
+                extracted_text.extend(res["rec_texts"])
         return '\n'.join(extracted_text)
     
     def get_service_info(self) -> Dict[str, Any]:
@@ -235,3 +236,6 @@ class BatchOCRService(OCRService):
                 progress_callback(i + 1, total)
         
         return results
+        
+
+
