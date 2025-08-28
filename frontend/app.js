@@ -2,7 +2,7 @@ class OCRApp {
     constructor() {
         this.initElements();
         this.initEventListeners();
-        this.apiUrl = 'http://localhost:5000';
+        this.apiUrl = 'http://localhost:20010';
     }
 
     initElements() {
@@ -55,6 +55,9 @@ class OCRApp {
 
     handleFileSelect(file) {
         if (!file) return;
+
+        // 打印文件全名（包含后缀）到控制台
+        console.log('Selected file:', file.name);
 
         // 验证文件类型
         const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png', 'image/bmp', 'image/tiff'];

@@ -3,7 +3,6 @@ Flask API主模块
 重构后的API接口，使用服务类进行业务逻辑处理
 """
 from typing import Dict, Any, Tuple, Union
-import os
 import logging
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
@@ -244,7 +243,9 @@ def process_file_ocr(file_path: str, file_type: str) -> str:
             if not image_processor.validate_image(file_path):
                 raise FileProcessingError("图片文件无效或损坏")
             
-            return ocr_service.recognize_image(file_path)
+            result = ocr_service.recognize_image(file_path)
+            
+            return result
     
     except (OCRError, FileProcessingError):
         raise
@@ -335,4 +336,4 @@ def serve_static(filename: str) -> str:
 
 if __name__ == '__main__':
     logger.info("启动Flask应用")
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True, host='0.0.0.0', port=20010,threaded=False)

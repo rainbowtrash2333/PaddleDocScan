@@ -1,0 +1,21 @@
+version: "3.9"
+
+services:
+  paddle-doc-scan:
+    build: .
+    container_name: paddle-doc-scan
+    restart: always
+    ports:
+      - "8980:80"   # NGINX端口映射到宿主机80端口
+    volumes:
+      - ./logs:/app/logs          # 日志目录映射
+      - ./uploads:/app/uploads    # 上传文件目录映射
+    environment:
+      - TZ=Asia/Shanghai
+      - PYTHONUNBUFFERED=1        # Python输出不缓冲
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
