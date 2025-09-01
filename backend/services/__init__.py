@@ -6,10 +6,11 @@ from .file_processor import (
     FileProcessor, PDFProcessor, ImageProcessor,
     PreviewGenerator, FileManager
 )
+from .ai_analysis_service import AIAnalysisService
 from .exceptions import (
     BaseAppException, OCRError, FileProcessingError,
     UnsupportedFileError, FileSizeError, ValidationError,
-    ConfigurationError
+    ConfigurationError, AIAnalysisError
 )
 
 __all__ = [
@@ -20,11 +21,13 @@ __all__ = [
     'ImageProcessor',
     'PreviewGenerator',
     'FileManager',
+    'AIAnalysisService',
     'BaseAppException',
     'OCRError',
     'FileProcessingError',
     'UnsupportedFileError',
     'FileSizeError',
     'ValidationError',
-    'ConfigurationError'
+    'ConfigurationError',
+    'AIAnalysisError'
 ]

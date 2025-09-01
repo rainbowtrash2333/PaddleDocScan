@@ -40,3 +40,8 @@ class ValidationError(BaseAppException):
 class ConfigurationError(BaseAppException):
     """配置异常"""
     pass
+
+
+class AIAnalysisError(BaseAppException):
+    """AI分析异常"""
+    pass

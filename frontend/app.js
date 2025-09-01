@@ -13,8 +13,10 @@ class OCRApp {
         this.previewContent = document.getElementById('previewContent');
         this.textOutput = document.getElementById('textOutput');
         this.copyBtn = document.getElementById('copyBtn');
+        this.aiAnalysisBtn = document.getElementById('aiAnalysisBtn');
         this.toast = new bootstrap.Toast(document.getElementById('toast'));
         this.toastBody = document.getElementById('toastBody');
+        this.currentText = ''; // 存储当前识别的文本
     }
 
     initEventListeners() {
@@ -50,6 +52,11 @@ class OCRApp {
         // 复制按钮
         this.copyBtn.addEventListener('click', () => {
             this.copyText();
+        });
+
+        // AI分析按钮
+        this.aiAnalysisBtn.addEventListener('click', () => {
+            this.openAIAnalysis();
         });
     }
 
@@ -146,9 +153,11 @@ class OCRApp {
     }
 
     showTextOutput(text) {
+        this.currentText = text; // 保存当前文本
         if (text && text.trim()) {
             this.textOutput.innerHTML = `<pre style="white-space: pre-wrap; margin: 0;">${this.escapeHtml(text)}</pre>`;
             this.copyBtn.style.display = 'block';
+            this.aiAnalysisBtn.style.display = 'block'; // 显示AI分析按钮
         } else {
             this.textOutput.innerHTML = `
                 <div class="text-center text-muted mt-5">
@@ -158,10 +167,12 @@ class OCRApp {
                 </div>
             `;
             this.copyBtn.style.display = 'none';
+            this.aiAnalysisBtn.style.display = 'none'; // 隐藏AI分析按钮
         }
     }
 
     clearTextOutput() {
+        this.currentText = ''; // 清空当前文本
         this.textOutput.innerHTML = `
             <div class="text-center text-muted mt-5">
                 <i class="fas fa-file-text fa-3x mb-3"></i>
@@ -169,6 +180,7 @@ class OCRApp {
             </div>
         `;
         this.copyBtn.style.display = 'none';
+        this.aiAnalysisBtn.style.display = 'none'; // 隐藏AI分析按钮
     }
 
     async copyText() {
@@ -217,6 +229,22 @@ class OCRApp {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    }
+
+    openAIAnalysis() {
+        if (!this.currentText || !this.currentText.trim()) {
+            this.showToast('没有可分析的文本内容', 'warning');
+            return;
+        }
+        
+        // 编码文本内容作为URL参数
+        const encodedContent = encodeURIComponent(this.currentText);
+        
+        // 打开AI分析页面并传递内容
+        const analysisUrl = `/analysis?content=${encodedContent}`;
+        window.open(analysisUrl, '_blank');
+        
+        this.showToast('已打开AI分析页面', 'info');
     }
 }
 

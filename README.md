@@ -45,6 +45,12 @@ cd backend
 python api.py
 ```
 
+或使用Gunicorn（推荐生产环境）：
+```bash
+cd backend
+gunicorn -w 4 -b 0.0.0.0:20010 api:app --threads 1
+```
+
 3. 启动前端
 ```bash
 cd frontend
