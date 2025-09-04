@@ -1,174 +1,96 @@
-# PaddleOCR 文档扫描应用
+# PaddleDocScan
 
-基于Flask后端和前端分离架构的OCR文档扫描Web应用，使用PaddleOCR进行文本识别。
+基于PaddleOCR和Dify AI的智能文档扫描识别系统。支持OCR文本识别和AI内容分析。
 
 ## 功能特性
 
-- ✅ 支持PDF、JPG、PNG、BMP、TIFF格式文件上传
-- ✅ 拖拽上传和点击上传两种方式
-- ✅ 左侧文件预览，右侧文本显示
-- ✅ 使用PaddleOCR进行高精度中英文OCR识别
-- ✅ 一键复制识别结果
-- ✅ 响应式界面设计
-- ✅ 实时处理状态显示
+- 📄 **多格式支持**: PDF、JPG、PNG、BMP、TIFF
+- 🔍 **OCR识别**: 基于PaddleOCR的中英文文本识别  
+- 🤖 **AI分析**: 集成Dify工作流的智能内容分析
+- 📱 **响应式UI**: 现代化的Web界面设计
+- 🚀 **拖拽上传**: 支持文件拖拽和点击上传
 
-## 项目结构
+## 快速开始
 
-```
-PaddleDocScan/
-├── backend/
-│   ├── api.py                     # Flask API主模块
-│   ├── config.py                  # 应用配置
-│   └── services/                  # 业务服务模块
-│       ├── __init__.py           # 服务模块导出
-│       ├── ocr_service.py        # OCR识别服务
-│       ├── file_processor.py     # 文件处理服务
-│       └── exceptions.py         # 自定义异常
-├── frontend/
-│   ├── index.html                # 前端页面
-│   └── app.js                   # 前端JavaScript逻辑
-├── uploads/                     # 临时上传目录
-├── requirements.txt             # Python依赖
-└── README.md                   # 项目说明
-```
-
-## 安装和运行
-
-1. 安装Python依赖：
+### 1. 环境准备
 ```bash
+# 安装依赖
 pip install -r requirements.txt
 ```
 
-2. 启动Flask后端：
+### 2. 快速启动
 ```bash
-cd backend
-python api.py
+# 启动后端服务
+cd backend && python3 api.py
+
+# 启动前端
+cd frontend && python3 -m http.server
+http://localhost:20010
 ```
 
-或使用Gunicorn（推荐生产环境）：
+### 3. Docker部署
 ```bash
-cd backend
-gunicorn -w 4 -b 0.0.0.0:20010 api:app --threads 1
+docker-compose up -d
 ```
 
-3. 启动前端
-```bash
-cd frontend
-python -m http.server
+## 项目架构
+
 ```
-
-
-4. 打开浏览器访问：
+PaddleDocScan/
+├── backend/                    # 后端服务
+│   ├── api.py                 # Flask API主入口
+│   ├── config.py              # 配置管理
+│   ├── controllers.py         # 控制器层
+│   ├── services/              # 业务服务层
+│   └── tests/                 # 测试套件
+├── frontend/                  # 前端界面
+│   ├── index.html             # 主页面
+│   ├── analysis.html          # AI分析页面
+│   └── assets/                # 静态资源
+├── docker-compose.yaml        # Docker配置
+└── nginx.conf                 # Nginx配置
 ```
-http://localhost:8000
-```
-
-## 技术栈
-
-### 后端
-- **Flask**: Web框架
-- **Flask-CORS**: 跨域支持
-- **PaddleOCR**: OCR文本识别
-- **PyMuPDF**: PDF文件处理
-- **Pillow**: 图像处理
-
-### 前端
-- **HTML5**: 页面结构
-- **Bootstrap 5**: UI框架
-- **JavaScript ES6**: 交互逻辑
-- **Font Awesome**: 图标库
-
-## 使用说明
-
-1. **上传文件**：
-   - 点击上传区域选择文件
-   - 或直接拖拽文件到上传区域
-   - 支持格式：PDF, JPG, PNG, BMP, TIFF
-   - 文件大小限制：16MB
-
-2. **查看结果**：
-   - 左侧显示文件预览
-   - 右侧显示OCR识别的文本
-   - 支持PDF多页面识别
-
-3. **复制文本**：
-   - 点击右上角"复制文本"按钮
-   - 文本将复制到剪贴板
 
 ## API接口
 
-### GET /api/health
-健康检查接口
+| 接口 | 方法 | 功能 |
+|-----|------|------|
+| `/api/upload` | POST | 文件上传和OCR识别 |
+| `/api/ai-analysis` | POST | AI内容分析 |
+| `/api/analysis-types` | GET | 获取分析类型 |
 
-**响应格式：**
-```json
-{
-    "success": true,
-    "message": "操作成功",
-    "data": {
-        "status": "healthy",
-        "services": {
-            "ocr": {...},
-            "file_processor": "ready"
-        }
+## 配置说明
+
+### Dify AI配置
+在 `backend/config.py` 中配置Dify模型：
+```python
+DIFY_MODELS = {
+    'general': {
+        'name': '通用分析',
+        'token': 'your-api-token',
+        'url': 'https://api.dify.ai/v1/workflows/run'
     }
 }
 ```
 
-### POST /api/upload
-上传文件并进行OCR识别
-
-**请求参数：**
-- `file`: 上传的文件
-
-**响应格式：**
-```json
-{
-    "success": true,
-    "message": "文档识别完成",
-    "data": {
-        "filename": "唯一文件名",
-        "original_filename": "原始文件名",
-        "text": "识别的文本内容",
-        "preview": "base64编码的预览图片",
-        "file_type": "文件类型",
-        "text_length": 1234,
-        "has_text": true
-    }
-}
+### 环境变量
+```bash
+FLASK_PORT=20010
+DIFY_GENERAL_TOKEN=your-token
+OCR_LANGUAGE=ch
 ```
 
-### POST /api/batch-upload
-批量文件上传和处理
+## 测试
 
-**请求参数：**
-- `files`: 文件列表
+```bash
+# 运行所有测试
+cd backend/tests && python run_tests.py
 
-**响应格式：**
-```json
-{
-    "success": true,
-    "message": "批量处理完成: 3/5 成功",
-    "data": {
-        "results": [...],
-        "summary": {
-            "total": 5,
-            "success": 3,
-            "failed": 2
-        }
-    }
-}
+# 单独测试
+python test_ocr_service.py
+python test_ai_analysis_api.py
 ```
 
-## 注意事项
+## 许可证
 
-1. 首次运行会自动下载PaddleOCR模型，请保持网络连接
-2. 上传的文件会被临时保存并在处理完成后自动删除
-3. 建议使用清晰的文档图像以获得更好的识别效果
-4. PDF文件将转换为图像进行OCR识别
-
-## 系统要求
-
-- Python 3.7+
-- 2GB+ 可用内存
-- 网络连接（首次运行下载模型）
+MIT License
