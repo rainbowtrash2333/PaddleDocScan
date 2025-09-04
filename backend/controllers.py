@@ -8,7 +8,7 @@ import traceback
 from typing import Dict, Any, Tuple, List
 from werkzeug.utils import secure_filename
 
-from .services import (
+from services import (
     OCRService, PDFProcessor, ImageProcessor, PreviewGenerator,
     FileManager, FileProcessor, OCRError, FileProcessingError,
     UnsupportedFileError, FileSizeError, ValidationError,
@@ -268,18 +268,23 @@ class OCRController:
 class AIAnalysisController:
     """AI分析业务逻辑控制器"""
     
-    def __init__(self):
-        """初始化AI分析控制器"""
-        self.ai_analysis_service = AIAnalysisService()
+    def __init__(self, dify_models_config: Dict[str, Dict[str, str]] = None):
+        """
+        初始化AI分析控制器
+        
+        Args:
+            dify_models_config: Dify模型配置
+        """
+        self.ai_analysis_service = AIAnalysisService(dify_models_config)
         logger.info("AI分析控制器初始化成功")
     
     def analyze_content(self, content: str, analysis_type: str = 'general') -> Dict[str, Any]:
         """
-        分析内容
+        分析内容 - 直接调用Dify
         
         Args:
             content: 要分析的文本内容
-            analysis_type: 分析类型
+            analysis_type: 分析类型 (general, summary, extract, sentiment)
             
         Returns:
             分析结果数据

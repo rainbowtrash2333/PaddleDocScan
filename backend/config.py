@@ -40,6 +40,38 @@ class Config:
     # CORS配置
     CORS_ORIGINS = os.environ.get('CORS_ORIGINS', '*').split(',')
     
+    # Dify AI配置
+    DIFY_MODELS = {
+        'general': {
+            'id': 'general',
+            'name': '通用分析',
+            'description': '对文本内容进行全面的分析和理解',
+            'url': os.environ.get('DIFY_GENERAL_URL', 'https://api.dify.ai/v1/workflows/run'),
+            'token': os.environ.get('DIFY_GENERAL_TOKEN', 'app-dAUUqBRS185OrvicXgikgb8K')
+        },
+        'summary': {
+            'id': 'summary',
+            'name': '内容摘要',
+            'description': '提取文本的核心内容和关键信息',
+            'url': os.environ.get('DIFY_SUMMARY_URL', 'https://api.dify.ai/v1/workflows/run'),
+            'token': os.environ.get('DIFY_SUMMARY_TOKEN', 'app-dAUUqBRS185OrvicXgikgb8K')
+        },
+        'extract': {
+            'id': 'extract',
+            'name': '信息提取',
+            'description': '从文本中提取特定的数据和实体',
+            'url': os.environ.get('DIFY_EXTRACT_URL', 'https://api.dify.ai/v1/workflows/run'),
+            'token': os.environ.get('DIFY_EXTRACT_TOKEN', 'app-dAUUqBRS185OrvicXgikgb8K')
+        },
+        'sentiment': {
+            'id': 'sentiment',
+            'name': '情感分析',
+            'description': '分析文本的情感倾向和态度',
+            'url': os.environ.get('DIFY_SENTIMENT_URL', 'https://api.dify.ai/v1/workflows/run'),
+            'token': os.environ.get('DIFY_SENTIMENT_TOKEN', 'app-dAUUqBRS185OrvicXgikgb8K')
+        }
+    }
+    
     @classmethod
     def init_app(cls, app) -> None:
         """初始化Flask应用配置"""

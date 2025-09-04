@@ -21,15 +21,24 @@ class AIAnalysis {
         this.analysisResult = document.getElementById('analysisResult');
         this.toast = document.getElementById('toast');
         this.toastBody = document.getElementById('toastBody');
+        this.analysisTypeSelect = document.getElementById('analysisTypeSelect');
         
         // 初始化Bootstrap Toast
         this.toastInstance = new bootstrap.Toast(this.toast);
+        
+        // 加载分析类型
+        this.loadAnalysisTypes();
     }
 
     bindEvents() {
         // 内容输入事件
         this.contentInput.addEventListener('input', () => {
             this.updateCharCounter();
+            this.updateAnalyzeButton();
+        });
+
+        // 分析类型选择事件
+        this.analysisTypeSelect.addEventListener('change', () => {
             this.updateAnalyzeButton();
         });
 
@@ -65,7 +74,7 @@ class AIAnalysis {
     updateCharCounter() {
         const content = this.contentInput.value;
         const charCount = content.length;
-        const maxChars = 50000;
+        const maxChars = CONFIG.MAX_TEXT_LENGTH;
         
         this.charCounter.textContent = `${charCount.toLocaleString()} / ${maxChars.toLocaleString()} 字符`;
         
@@ -78,39 +87,46 @@ class AIAnalysis {
 
     updateAnalyzeButton() {
         const content = this.contentInput.value.trim();
-        const isValid = content.length > 0 && content.length <= 50000 && !this.isAnalyzing;
+        const selectedType = this.analysisTypeSelect.value;
+        const isValid = content.length > 0 && content.length <= CONFIG.MAX_TEXT_LENGTH && selectedType && !this.isAnalyzing;
         
         this.analyzeBtn.disabled = !isValid;
         
-        if (content.length > 50000) {
-            this.showToast('内容长度超过限制，最多支持50,000个字符', 'warning');
+        if (content.length > CONFIG.MAX_TEXT_LENGTH) {
+            this.showToast(`内容长度超过限制，最多支持${CONFIG.MAX_TEXT_LENGTH.toLocaleString()}个字符`, 'warning');
         }
     }
 
     async performAnalysis() {
         const content = this.contentInput.value.trim();
+        const analysisType = this.analysisTypeSelect.value;
         
         if (!content) {
             this.showToast('请输入需要分析的内容', 'warning');
             return;
         }
 
-        if (content.length > 50000) {
-            this.showToast('内容长度超过限制，最多支持50,000个字符', 'error');
+        if (!analysisType) {
+            this.showToast('请选择分析模型', 'warning');
+            return;
+        }
+
+        if (content.length > CONFIG.MAX_TEXT_LENGTH) {
+            this.showToast(`内容长度超过限制，最多支持${CONFIG.MAX_TEXT_LENGTH.toLocaleString()}个字符`, 'error');
             return;
         }
 
         try {
             this.setAnalyzingState(true);
             
-            const response = await fetch('/api/ai-analysis', {
+            const response = await fetch(`${CONFIG.API_BASE_URL}${CONFIG.ENDPOINTS.AI_ANALYSIS}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
                     content: content,
-                    analysis_type: 'general'
+                    analysis_type: analysisType
                 })
             });
 
@@ -141,14 +157,16 @@ class AIAnalysis {
             this.loadingContainer.classList.add('show');
             this.copyResultBtn.style.display = 'none';
             
-            // 禁用按钮
+            // 禁用按钮和选择框
             this.analyzeBtn.disabled = true;
+            this.analysisTypeSelect.disabled = true;
             this.analyzeBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>分析中...';
         } else {
             // 隐藏加载状态
             this.loadingContainer.classList.remove('show');
             
-            // 恢复按钮
+            // 恢复按钮和选择框
+            this.analysisTypeSelect.disabled = false;
             this.analyzeBtn.innerHTML = '<i class="fas fa-magic me-2"></i>开始AI分析';
             this.updateAnalyzeButton();
         }
@@ -259,6 +277,7 @@ class AIAnalysis {
             this.contentInput.value = decodeURIComponent(content);
             this.updateCharCounter();
             this.updateAnalyzeButton();
+            this.showToast('已自动填入来自OCR的文本内容', 'success');
         }
     }
 
@@ -283,6 +302,50 @@ class AIAnalysis {
         
         this.toastBody.textContent = message;
         this.toastInstance.show();
+    }
+
+    async loadAnalysisTypes() {
+        try {
+            const response = await fetch(`${CONFIG.API_BASE_URL}${CONFIG.ENDPOINTS.ANALYSIS_TYPES}`);
+            const result = await response.json();
+            
+            if (result.success && result.data) {
+                this.populateAnalysisTypes(result.data);
+            } else {
+                throw new Error(result.message || '获取分析类型失败');
+            }
+        } catch (error) {
+            console.error('加载分析类型失败:', error);
+            this.analysisTypeSelect.innerHTML = '<option value="">加载失败，请刷新页面重试</option>';
+            this.showToast('加载AI模型列表失败: ' + (error.message || '网络错误'), 'error');
+        }
+    }
+
+    populateAnalysisTypes(types) {
+        this.analysisTypeSelect.innerHTML = '';
+        
+        // 添加默认选项
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = '请选择分析模型...';
+        this.analysisTypeSelect.appendChild(defaultOption);
+        
+        // 添加分析类型选项
+        types.forEach(type => {
+            const option = document.createElement('option');
+            option.value = type.id;
+            option.textContent = `${type.name} - ${type.description}`;
+            this.analysisTypeSelect.appendChild(option);
+        });
+        
+        // 启用选择框
+        this.analysisTypeSelect.disabled = false;
+        
+        // 默认选择第一个分析类型
+        if (types.length > 0) {
+            this.analysisTypeSelect.value = types[0].id;
+            this.updateAnalyzeButton();
+        }
     }
 }
 

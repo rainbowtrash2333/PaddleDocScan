@@ -14,6 +14,7 @@ from services import (
     FileProcessor, ValidationError, OCRError, FileProcessingError,
     AIAnalysisError
 )
+from config import Config
 
 
 # 配置日志
@@ -28,14 +29,14 @@ app = Flask(__name__)
 CORS(app)
 
 # 应用配置
-UPLOAD_FOLDER = 'uploads'
+UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), 'uploads')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = FileProcessor.MAX_FILE_SIZE
 
 # 初始化控制器
 try:
     ocr_controller = OCRController(UPLOAD_FOLDER)
-    ai_analysis_controller = AIAnalysisController()
+    ai_analysis_controller = AIAnalysisController(Config.DIFY_MODELS)
     logger.info("所有控制器初始化成功")
 except Exception as e:
     logger.error(f"控制器初始化失败: {e}")
@@ -162,6 +163,31 @@ def batch_upload_and_process():
     except Exception as e:
         logger.error(f"批量上传处理异常: {e}")
         return ResponseHelper.error("批量处理失败", "BATCH_ERROR", 500)
+
+
+@app.route('/api/analysis-types', methods=['GET'])
+def get_analysis_types():
+    """
+    获取可用的分析类型接口
+    
+    Returns:
+        包含分析类型列表的JSON响应
+    """
+    try:
+        # 从配置中获取分析类型
+        analysis_types = []
+        for model_id, model_config in Config.DIFY_MODELS.items():
+            analysis_types.append({
+                'id': model_config['id'],
+                'name': model_config['name'],
+                'description': model_config['description']
+            })
+        
+        return ResponseHelper.success(analysis_types, "获取分析类型成功")
+        
+    except Exception as e:
+        logger.error(f"获取分析类型异常: {e}")
+        return ResponseHelper.error("获取分析类型失败", "GET_TYPES_ERROR", 500)
 
 
 @app.route('/api/ai-analysis', methods=['POST'])

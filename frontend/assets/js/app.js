@@ -2,7 +2,7 @@ class OCRApp {
     constructor() {
         this.initElements();
         this.initEventListeners();
-        this.apiUrl = 'http://localhost:20010';
+        this.apiUrl = CONFIG.API_BASE_URL;
     }
 
     initElements() {
@@ -67,14 +67,14 @@ class OCRApp {
         console.log('Selected file:', file.name);
 
         // 验证文件类型
-        const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png', 'image/bmp', 'image/tiff'];
+        const allowedTypes = CONFIG.ALLOWED_FILE_TYPES;
         if (!allowedTypes.includes(file.type)) {
             this.showToast('请选择支持的文件格式（PDF, JPG, PNG, BMP, TIFF）', 'error');
             return;
         }
 
         // 验证文件大小（16MB）
-        if (file.size > 16 * 1024 * 1024) {
+        if (file.size > CONFIG.MAX_FILE_SIZE) {
             this.showToast('文件大小不能超过16MB', 'error');
             return;
         }
@@ -91,7 +91,7 @@ class OCRApp {
             this.hidePreview();
             this.clearTextOutput();
 
-            const response = await fetch(`${this.apiUrl}/api/upload`, {
+            const response = await fetch(`${this.apiUrl}${CONFIG.ENDPOINTS.UPLOAD}`, {
                 method: 'POST',
                 body: formData
             });
@@ -241,7 +241,7 @@ class OCRApp {
         const encodedContent = encodeURIComponent(this.currentText);
         
         // 打开AI分析页面并传递内容
-        const analysisUrl = `/analysis?content=${encodedContent}`;
+        const analysisUrl = `/analysis.html?content=${encodedContent}`;
         window.open(analysisUrl, '_blank');
         
         this.showToast('已打开AI分析页面', 'info');
