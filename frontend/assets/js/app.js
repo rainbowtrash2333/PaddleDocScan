@@ -66,9 +66,16 @@ class OCRApp {
         // 打印文件全名（包含后缀）到控制台
         console.log('Selected file:', file.name);
 
-        // 验证文件类型
+        // 验证文件类型 - 兼容Chrome 83
         const allowedTypes = CONFIG.ALLOWED_FILE_TYPES;
-        if (!allowedTypes.includes(file.type)) {
+        const fileName = file.name.toLowerCase();
+        const fileExtension = fileName.substring(fileName.lastIndexOf('.'));
+        
+        // 检查MIME类型或文件扩展名
+        const isValidType = allowedTypes.includes(file.type) || 
+                           ['.pdf', '.jpg', '.jpeg', '.png', '.bmp', '.tiff'].includes(fileExtension);
+        
+        if (!isValidType) {
             this.showToast('请选择支持的文件格式（PDF, JPG, PNG, BMP, TIFF）', 'error');
             return;
         }
