@@ -4,10 +4,10 @@ Flask API主模块
 """
 import os
 import logging
-import gc
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, send_from_directory
 from flask_cors import CORS
 from werkzeug.exceptions import RequestEntityTooLarge
+import uuid
 
 from controllers import OCRController, AIAnalysisController, FileValidator, ResponseHelper
 from services import (
@@ -115,7 +115,12 @@ def upload_and_process():
             return ResponseHelper.error(error_msg, "INVALID_REQUEST")
         
         file = request.files['file']
-        
+
+        # 生成唯一ID
+        unique_id = str(uuid.uuid4())
+
+        # 修改文件名：uuid + 原始文件名
+        file.filename = f"{unique_id}_{file.filename}"
         # 处理文件
         result_data = ocr_controller.process_single_file(file)
         
