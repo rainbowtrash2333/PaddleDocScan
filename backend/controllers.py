@@ -16,7 +16,8 @@ from services import (
 )
 
 logger = logging.getLogger(__name__)
-
+logger.setLevel(logging.INFO)
+logger.propagate = True  # 允许向上级 logger 传递到 root logger
 
 class FileValidator:
     """文件验证器"""
@@ -227,6 +228,7 @@ class OCRController:
             OCRError: OCR处理失败
             FileProcessingError: 文件处理失败
         """
+        logger.info(f"文件执行OCR: {file_path}")
         try:
             if file_type == 'pdf':
                 # 处理PDF文件

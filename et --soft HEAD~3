@@ -1,0 +1,16 @@
+[33m09ad222[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m bug fix
+[33mc72d228[m remove logs folder from repository
+[33mde4ae68[m bug fix
+[33m64375e9[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m remove logs
+[33m0b43752[m 支持中文文件
+[33me02cfb6[m delete temp files
+[33mc832a45[m 添加chrome 83 支持
+[33m9b432fa[m update readme
+[33m4f805b9[m update reame
+[33m55c3911[m add tests
+[33ma9d7dbb[m 接入dify ai
+[33md42026d[m add ai analysis
+[33mc495ce3[m bug fix
+[33m4d44905[m bug fix
+[33m1c58101[m v0.1
+[33m393e06b[m init

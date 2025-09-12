@@ -46,9 +46,9 @@ def log_request(f):
         user_agent = request.headers.get('User-Agent', 'Unknown')
         
         api_logger.info(f"请求开始 - 方法: {request.method}, 路径: {request.path}, IP: {client_ip}, User-Agent: {user_agent}")
-        
-        if request.json:
-            api_logger.debug(f"请求参数 (JSON): {request.json}")
+
+        if request.is_json:  # 只有请求头 Content-Type: application/json 才会解析
+            api_logger.debug(f"请求参数 (JSON): {request.get_json()}")
         if request.form:
             form_data = dict(request.form)
             api_logger.debug(f"请求参数 (Form): {form_data}")
@@ -161,7 +161,6 @@ def upload_and_process():
         file.filename = f"{unique_id}_{file.filename}"
         # 处理文件
         result_data = ocr_controller.process_single_file(file)
-        
         return ResponseHelper.success(result_data, "文档识别完成")
         
     except ValidationError as e:

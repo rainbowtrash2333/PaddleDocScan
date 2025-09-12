@@ -8,7 +8,7 @@ from typing import Dict, Any, Optional
 from .exceptions import AIAnalysisError
 
 logger = logging.getLogger(__name__)
-
+logger.propagate = True
 
 class AIAnalysisService:
     """AI分析服务类 - 直接调用Dify工作流"""

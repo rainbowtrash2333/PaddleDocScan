@@ -28,6 +28,8 @@ class OCRService:
             use_angle_cls: 是否使用角度分类器
         """
         self.logger = logging.getLogger(__name__)
+        self.logger.setLevel(logging.INFO)
+        self.logger.propagate = True  # 允许向上级 logger 传递到 root logger
         try:
             self.ocr = PaddleOCR(
                 use_angle_cls=use_angle_cls,
