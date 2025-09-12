@@ -4,10 +4,12 @@ Flask API主模块
 """
 import os
 import logging
-from flask import Flask, request, send_from_directory
+import time
+from flask import Flask, request, send_from_directory, g
 from flask_cors import CORS
 from werkzeug.exceptions import RequestEntityTooLarge
 import uuid
+from functools import wraps
 
 from controllers import OCRController, AIAnalysisController, FileValidator, ResponseHelper
 from services import (
@@ -23,6 +25,8 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
+api_logger = logging.getLogger('api_requests')
+performance_logger = logging.getLogger('performance')
 
 # Flask应用配置
 app = Flask(__name__)
@@ -32,6 +36,36 @@ CORS(app)
 UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), 'uploads')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = FileProcessor.MAX_FILE_SIZE
+
+# 请求日志装饰器
+def log_request(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        g.start_time = time.time()
+        client_ip = request.environ.get('HTTP_X_FORWARDED_FOR', request.environ.get('REMOTE_ADDR'))
+        user_agent = request.headers.get('User-Agent', 'Unknown')
+        
+        api_logger.info(f"请求开始 - 方法: {request.method}, 路径: {request.path}, IP: {client_ip}, User-Agent: {user_agent}")
+        
+        if request.json:
+            api_logger.debug(f"请求参数 (JSON): {request.json}")
+        if request.form:
+            form_data = dict(request.form)
+            api_logger.debug(f"请求参数 (Form): {form_data}")
+        if request.files:
+            file_info = {key: f"{file.filename} ({file.content_length} bytes)" for key, file in request.files.items()}
+            api_logger.debug(f"上传文件: {file_info}")
+            
+        try:
+            response = f(*args, **kwargs)
+            duration = time.time() - g.start_time
+            performance_logger.info(f"请求完成 - 路径: {request.path}, 耗时: {duration:.3f}s, 状态: 成功")
+            return response
+        except Exception as e:
+            duration = time.time() - g.start_time
+            api_logger.error(f"请求失败 - 路径: {request.path}, 耗时: {duration:.3f}s, 错误: {str(e)}")
+            raise
+    return decorated_function
 
 # 初始化控制器
 try:
@@ -50,13 +84,15 @@ except Exception as e:
 @app.errorhandler(RequestEntityTooLarge)
 def handle_file_too_large(e):
     """处理文件过大异常"""
+    api_logger.warning(f"文件过大异常 - 路径: {request.path}, IP: {request.environ.get('REMOTE_ADDR')}")
     return ResponseHelper.error("文件大小超过限制", "FILE_TOO_LARGE", 413)
 
 
 @app.errorhandler(Exception)
 def handle_general_exception(e):
     """处理通用异常"""
-    logger.error(f"未处理的异常: {e}")
+    client_ip = request.environ.get('HTTP_X_FORWARDED_FOR', request.environ.get('REMOTE_ADDR'))
+    logger.error(f"未处理的异常 - 路径: {request.path}, IP: {client_ip}, 异常: {e}")
     return ResponseHelper.error("服务器内部错误", "INTERNAL_ERROR", 500)
 
 
@@ -87,6 +123,7 @@ def serve_static(filename: str):
 # =============================================================================
 
 @app.route('/api/health', methods=['GET'])
+@log_request
 def health_check():
     """健康检查接口"""
     try:
@@ -101,6 +138,7 @@ def health_check():
 
 
 @app.route('/api/upload', methods=['POST'])
+@log_request
 def upload_and_process():
     """
     文件上传和OCR处理接口
@@ -137,6 +175,7 @@ def upload_and_process():
 
 
 @app.route('/api/batch-upload', methods=['POST'])
+@log_request
 def batch_upload_and_process():
     """
     批量文件上传和处理接口
@@ -171,6 +210,7 @@ def batch_upload_and_process():
 
 
 @app.route('/api/analysis-types', methods=['GET'])
+@log_request
 def get_analysis_types():
     """
     获取可用的分析类型接口
@@ -196,6 +236,7 @@ def get_analysis_types():
 
 
 @app.route('/api/ai-analysis', methods=['POST'])
+@log_request
 def ai_analysis():
     """
     AI内容分析接口
