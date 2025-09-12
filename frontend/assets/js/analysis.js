@@ -67,8 +67,8 @@ class AIAnalysis {
             }
         });
 
-        // 页面加载时检查是否有URL参数传入的内容
-        this.checkUrlParameters();
+        // 页面加载时从 SessionStorage 接收文本内容
+        this.initializeFromSession();
     }
 
     updateCharCounter() {
@@ -268,16 +268,20 @@ class AIAnalysis {
         }
     }
 
-    checkUrlParameters() {
-        // 检查URL参数，支持从其他页面传入内容
-        const urlParams = new URLSearchParams(window.location.search);
-        const content = urlParams.get('content');
-        
-        if (content) {
-            this.contentInput.value = decodeURIComponent(content);
-            this.updateCharCounter();
-            this.updateAnalyzeButton();
-            this.showToast('已自动填入来自OCR的文本内容', 'success');
+    initializeFromSession() {
+        try {
+            const content = sessionStorage.getItem('analysisContent');
+            if (content && content.trim()) {
+                this.contentInput.value = content;
+                // 读取后清除，避免刷新时重复覆盖
+                sessionStorage.removeItem('analysisContent');
+                this.updateCharCounter();
+                this.updateAnalyzeButton();
+                this.showToast('已自动填入来自OCR的文本内容', 'success');
+            }
+        } catch (e) {
+            // sessionStorage 可能不可用，忽略
+            console.warn('读取 sessionStorage 失败:', e);
         }
     }
 

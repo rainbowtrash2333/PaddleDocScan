@@ -27,8 +27,8 @@ body {
 .analysis-header {
     background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
     color: white;
-    padding: 30px 0;
-    margin-bottom: 30px;
+    padding: 18px 0; /* 缩小上下留白 */
+    margin-bottom: 20px; /* 减少与正文间距 */
     border-radius: 12px;
     text-align: center;
     box-shadow: var(--shadow);
@@ -37,13 +37,13 @@ body {
 .analysis-header h1 {
     margin: 0;
     font-weight: 600;
-    font-size: 2.2rem;
+    font-size: 2rem; /* 略微减小标题，整体更紧凑 */
 }
 
 .analysis-header p {
-    margin: 10px 0 0;
+    margin: 6px 0 0; /* 减少副标题与标题间距 */
     opacity: 0.9;
-    font-size: 1.1rem;
+    font-size: 1rem;
 }
 
 .content-panel {
@@ -338,6 +338,17 @@ body {
 .model-selector-inline .form-label {
     color: white;
     font-weight: 600;
+    font-size: 15px; /* 放大“选择AI模型”文字 */
+}
+
+/* 让头部区域更紧凑：缩小内联区域的间距 */
+.analysis-header .d-flex {
+    gap: 12px;
+}
+
+/* 覆盖头部标题块默认的较大下边距（来自 .mb-4） */
+.analysis-header .text-center.mb-4 {
+    margin-bottom: 0.75rem !important;
 }
 
 /* 内联分析按钮样式 - 醒目的橙红色 */

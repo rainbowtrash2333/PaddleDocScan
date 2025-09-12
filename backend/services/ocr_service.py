@@ -34,6 +34,7 @@ class OCRService:
             self.ocr = PaddleOCR(
                 use_angle_cls=use_angle_cls,
                 lang=lang,
+                device='gpu:0'
             )
             self.logger.info("PaddleOCR初始化成功")
         except Exception as e:

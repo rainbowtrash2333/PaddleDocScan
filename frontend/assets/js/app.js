@@ -243,15 +243,15 @@ class OCRApp {
             this.showToast('没有可分析的文本内容', 'warning');
             return;
         }
-        
-        // 编码文本内容作为URL参数
-        const encodedContent = encodeURIComponent(this.currentText);
-        
-        // 打开AI分析页面并传递内容
-        const analysisUrl = `/analysis.html?content=${encodedContent}`;
-        window.open(analysisUrl, '_blank');
-        
-        this.showToast('已打开AI分析页面', 'info');
+        // 使用 SessionStorage 传递数据，并在同一标签页跳转
+        try {
+            sessionStorage.setItem('analysisContent', this.currentText);
+        } catch (e) {
+            console.warn('写入 sessionStorage 失败:', e);
+        }
+
+        // 在当前标签页跳转，确保可读取 sessionStorage
+        window.location.href = '/analysis.html';
     }
 }
 
